@@ -38,6 +38,8 @@ public class player : MonoBehaviour
         float v = Input.GetAxisRaw("Vertical");
         Vector3 direction = transform.right * h + transform.forward * v;
         transform.position += direction * moveSpeed * Time.deltaTime;
+        //enquanto não funciona o axis
+       
 
         // --- Pulo ---
         float jump = Input.GetAxis("Jump");
