@@ -21,6 +21,8 @@ public class Playermover : MonoBehaviour
 
     public Transform Pejogador;
 
+    private bool IsJumping;
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -39,6 +41,9 @@ public class Playermover : MonoBehaviour
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -0.5f;
+            IsJumping = false;
+            animator.ResetTrigger("Saltar");
+            
         }
 
         // 2. Input de Movimento
@@ -59,15 +64,16 @@ public class Playermover : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(move), Time.deltaTime * 10);
         }
 
-        if(Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if(Input.GetKeyDown(KeyCode.Space) && isGrounded && !IsJumping)
         {
             velocity.y = 1f * jumpHeight;
+
+            IsJumping = true;
             animator.SetTrigger("Saltar");
+            animator.SetBool("isJumping", true);
         }
 
         animator.SetBool("Mover", move != Vector3.zero);
-
-        animator.SetBool("NoChao", isGrounded);
 
 
         // 6. Aplicar Gravidade
