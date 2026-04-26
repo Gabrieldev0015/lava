@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Playermover : MonoBehaviour
 {
+    private Transform myCamera;
 
     [Header("Configurações de Movimento")]
     public CharacterController controller;
@@ -14,52 +15,60 @@ public class Playermover : MonoBehaviour
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
 
-    private Animator anim;
+    private Animator animator;
     private Vector3 velocity;
     private bool isGrounded;
+
+    public Transform Pejogador;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
 
         // Pega o Animator que está no modelo (filho do objeto Player)
-        anim = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();
 
-        // Removemos o Rigidbody daqui, pois o CharacterController faz o trabalho físico.
+        myCamera = Camera.main.transform;
     }
 
     void Update()
     {
-        // 1. Checagem de Chão
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        // 1. Checagem de chão (PRIMEIRO)
+        isGrounded = Physics.CheckSphere(Pejogador.position, 0.3f, groundMask);
 
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f;
+            velocity.y = -0.5f;
         }
 
         // 2. Input de Movimento
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.right * x + transform.forward * z;
+        Vector3 move = new Vector3(x, 0, z);
 
-        // 3. Executa o Movimento
-        controller.Move(move * speed * Time.deltaTime);
+        move = myCamera.TransformDirection(move);
+        move.y = 0;
 
-        // 4. Lógica de Animação
-        if (anim != null)
+        controller.Move(move * Time.deltaTime * speed);
+        controller.Move(new Vector3(0, -9.81f,  0) * Time.deltaTime);
+
+
+        if (move != Vector3.zero)
         {
-            // move.magnitude retorna a "força" do movimento (0 quando parado, ~1 andando)
-            anim.SetFloat("Velocidade", move.magnitude);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(move), Time.deltaTime * 10);
         }
 
-        // 5. Pulo
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if(Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            // Fórmula física para altura de pulo: v = sqrt(h * -2 * g)
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            velocity.y = 20f;
+            animator.SetTrigger("Saltar");
         }
+
+        animator.SetBool("Mover", move != Vector3.zero);
+
+        animator.SetBool("NoChao", isGrounded);
+
 
         // 6. Aplicar Gravidade
         velocity.y += gravity * Time.deltaTime;
