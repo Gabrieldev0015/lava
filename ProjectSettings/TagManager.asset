@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - TelaFimJogo
+  - Checkpoint
   layers:
   - Default
   - TransparentFX

@@ -61,7 +61,7 @@ public class Playermover : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            velocity.y = 20f;
+            velocity.y = 1f * jumpHeight;
             animator.SetTrigger("Saltar");
         }
 
